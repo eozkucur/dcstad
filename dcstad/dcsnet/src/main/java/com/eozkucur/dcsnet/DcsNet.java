@@ -301,6 +301,9 @@ public class DcsNet implements Runnable, ServiceListener {
          }
       } catch (InterruptedException e) {
          e.printStackTrace();
+         if(false){
+            
+         }
       }
    }
 
