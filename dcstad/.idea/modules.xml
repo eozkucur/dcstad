@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/androidapp/androidapp.iml" filepath="$PROJECT_DIR$/androidapp/androidapp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dcsnet/dcsnet.iml" filepath="$PROJECT_DIR$/dcsnet/dcsnet.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dcsserver/dcsserver.iml" filepath="$PROJECT_DIR$/dcsserver/dcsserver.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dcstad.iml" filepath="$PROJECT_DIR$/dcstad.iml" />
+    </modules>
+  </component>
+</project>
