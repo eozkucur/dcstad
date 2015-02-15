@@ -1,19 +1,24 @@
 package com.eozkucur.dcsserver;
 
+import com.eozkucur.dcsnet.AircraftState;
 import com.eozkucur.dcsnet.DcsNet;
 import com.eozkucur.dcsnet.DcsNetListener;
+import com.eozkucur.dcsnet.Waypoint;
 
 public class DcsClient implements DcsNetListener{
+   AircraftState state;
 
    public static void main(String[] args) {
       try {
          System.out.println("Start client");
-         DcsNet net=new DcsNet(4444,7777);
-         net.addListener(new DcsClient());
+         DcsClient dcsClient=new DcsClient();
+         dcsClient.state=new AircraftState();
+         DcsNet net=new DcsNet(5555,7777,dcsClient.state);
+         net.addListener(dcsClient);
          Thread.sleep(2000);
          net.startClient(true);
          System.out.println("Waiting");
-         Thread.sleep(300000);
+         Thread.sleep(30000);
          net.shutdown();
          System.out.println("Finish");
       } catch (InterruptedException e) {
@@ -24,6 +29,18 @@ public class DcsClient implements DcsNetListener{
    @Override
    public void dataChanged() {
       System.out.println("Data changed");
+      System.out.print("State: ");
+      System.out.print(state.pos.x+",");
+      System.out.print(state.pos.y+",");
+      System.out.print(state.bearing+" wp count: ");
+      System.out.print(state.waypoints.size()+": ");
+      for(int i=0;i< state.waypoints.size();i++){
+         Waypoint wp=state.waypoints.get(i);
+         System.out.print(wp.pos.x+",");
+         System.out.print(wp.pos.y+",");
+         System.out.print(wp.id+" ");
+      }
+      System.out.println();
    }
 
    @Override

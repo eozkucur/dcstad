@@ -43,7 +43,7 @@ public class DcsNet implements Runnable, ServiceListener {
 
    ArrayList<DcsNetListener> listeners = new ArrayList<DcsNetListener>();
 
-   int timeoutDur = 500;
+   int timeoutDur = 100;
 
    public String serverAddress = "0";
 
@@ -71,7 +71,10 @@ public class DcsNet implements Runnable, ServiceListener {
    ByteArrayInputStream inBuffStream = new ByteArrayInputStream(recBuff);
    Unpacker unpacker=msgpack.createUnpacker(inBuffStream);
 
-   public DcsNet(int localListenPort, int servingPort) {
+   AircraftState state;
+
+   public DcsNet(int localListenPort, int servingPort,AircraftState state) {
+      this.state=state;
       this.clientListenPort = localListenPort;
       this.servingPort = servingPort;
       thread = new Thread(this);
@@ -87,6 +90,9 @@ public class DcsNet implements Runnable, ServiceListener {
    }
 
    public void startClient(boolean discover) {
+      if(clientThread != null){
+         return;
+      }
       this.discover = discover;
       if (!discover) {
          this.serverAddress = "127.0.0.1";
@@ -94,9 +100,6 @@ public class DcsNet implements Runnable, ServiceListener {
       synchronized (this) {
          clientEnabled = true;
          this.notifyAll();
-      }
-      if (clientThread != null) {
-         return;
       }
       clientThread = new Thread(new Runnable() {
          @Override
@@ -205,12 +208,12 @@ public class DcsNet implements Runnable, ServiceListener {
    }
 
    public void startServer() {
+      if (serverThread != null) {
+         return;
+      }
       synchronized (this) {
          serverEnabled = true;
          this.notifyAll();
-      }
-      if (serverThread != null) {
-         return;
       }
       try {
          serverCommandSocket = new ServerSocket(servingPort + 1);
@@ -231,7 +234,7 @@ public class DcsNet implements Runnable, ServiceListener {
                      clientSocket.close();
                      clientSocket = null;
                   } catch (IOException e) {
-                     e.printStackTrace();
+                     //e.printStackTrace();
                      if (serverSendSocket != null) {
                         serverSendSocket.close();
                         serverSendSocket = null;
@@ -338,7 +341,7 @@ public class DcsNet implements Runnable, ServiceListener {
                      System.out.println("Invalid packet");
                   }
                } catch (IOException e) {
-                  e.printStackTrace();
+                  //e.printStackTrace();
                   try {
                      Thread.sleep(timeoutDur);
                   } catch (InterruptedException e1) {
@@ -356,12 +359,25 @@ public class DcsNet implements Runnable, ServiceListener {
             if (recBuffSize > 0) {
                System.out.println("Received");
                inBuffStream.reset();
-               //try {
-               //   int pox=unpacker.readInt();
-               //
-               //} catch (IOException e) {
-               //   e.printStackTrace();
-               //}
+               try {
+                  state.pos.x=unpacker.readDouble();
+                  state.pos.y=unpacker.readDouble();
+                  state.bearing=unpacker.readDouble();
+                  int wpSize=unpacker.readInt();
+                  while(state.waypoints.size()>wpSize){
+                     state.waypoints.remove(state.waypoints.size()-1);
+                  }
+                  while(state.waypoints.size()<wpSize){
+                     state.waypoints.add(new Waypoint());
+                  }
+                  for(int i=0;i<wpSize;i++){
+                     state.waypoints.get(i).pos.x=unpacker.readDouble();
+                     state.waypoints.get(i).pos.y=unpacker.readDouble();
+                     state.waypoints.get(i).id=unpacker.readInt();
+                  }
+               } catch (IOException e) {
+                  e.printStackTrace();
+               }
                for (int i = 0; i < listeners.size(); i++) {
                   listeners.get(i).dataChanged();
                }
