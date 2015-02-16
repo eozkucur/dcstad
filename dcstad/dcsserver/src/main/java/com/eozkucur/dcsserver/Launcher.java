@@ -278,7 +278,8 @@ public class Launcher extends JPanel implements DcsNetListener {
       g2.setColor(Color.BLUE);
       AffineTransform trans2=g2.getTransform();
 
-      double aircraftBearing=  Math.toRadians(-state.bearing+90);
+      //double aircraftBearing=  Math.toRadians(-state.bearing+90);
+      double aircraftBearing=  -state.bearing+Math.PI/2;
       double aircraftScale=0.05f;
       if (focusedObject == -1) {
          g2.rotate(aircraftBearing-Math.PI/2);
