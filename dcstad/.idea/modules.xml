@@ -6,7 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/dcsnet/dcsnet.iml" filepath="$PROJECT_DIR$/dcsnet/dcsnet.iml" />
       <module fileurl="file://$PROJECT_DIR$/dcsserver/dcsserver.iml" filepath="$PROJECT_DIR$/dcsserver/dcsserver.iml" />
       <module fileurl="file://$PROJECT_DIR$/dcstad.iml" filepath="$PROJECT_DIR$/dcstad.iml" />
-      <module fileurl="file://$PROJECT_DIR$/luatest/luatest.iml" filepath="$PROJECT_DIR$/luatest/luatest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lua/lua.iml" filepath="$PROJECT_DIR$/lua/lua.iml" />
     </modules>
   </component>
 </project>
