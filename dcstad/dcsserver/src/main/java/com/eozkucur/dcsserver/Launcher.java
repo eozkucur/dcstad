@@ -203,7 +203,7 @@ public class Launcher extends JPanel implements DcsNetListener {
                System.out.println("Changing scale");
                mileScale *= 2;
                if (mileScale > 160) {
-                  mileScale = 20;
+                  mileScale = 10;
                }
                Launcher.this.repaint();
             } else if (e.getButton() == MouseEvent.BUTTON3) {
