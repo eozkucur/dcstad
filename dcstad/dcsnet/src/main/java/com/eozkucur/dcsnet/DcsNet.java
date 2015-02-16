@@ -375,6 +375,7 @@ public class DcsNet implements Runnable, ServiceListener {
                      state.waypoints.get(i).pos.y=unpacker.readFloat();
                      state.waypoints.get(i).id=unpacker.readInt();
                   }
+                  state.selectedwp=unpacker.readInt();
                } catch (IOException e) {
                   e.printStackTrace();
                }

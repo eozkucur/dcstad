@@ -28,7 +28,7 @@ public class DcsServerLua {
          //41.933544, 42.098166
          state.pos.y=41.955505;
          state.pos.x=41.844450;
-         state.bearing=15;
+         state.bearing=105;
          Waypoint wp=new Waypoint();
          wp.id=1;
          wp.pos.y=41.986136;
@@ -49,6 +49,7 @@ public class DcsServerLua {
          wp.pos.y=41.933544;
          wp.pos.x=42.098166;
          state.waypoints.add(wp);
+         state.selectedwp=2;
 
          packer.write((float)state.pos.x);
          packer.write((float)state.pos.y);
@@ -60,6 +61,7 @@ public class DcsServerLua {
             packer.write((float)wp.pos.y);
             packer.write(wp.id);
          }
+         packer.write(state.selectedwp);
          byte[] buf=bout.toByteArray();
 
          System.out.println("Starting socket");

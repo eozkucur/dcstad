@@ -26,6 +26,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
@@ -68,6 +69,9 @@ public class Launcher extends JPanel implements DcsNetListener {
 
    int focusedObject = -1;
 
+   private int startx;
+   private int starty;
+
    public Launcher() {
       System.out.println("constructing launcher");
       try {
@@ -94,6 +98,7 @@ public class Launcher extends JPanel implements DcsNetListener {
       images.add(createImage("/images/state11.png", "tray icon 11"));
       trayIcon =
           new TrayIcon(images.get(0));
+      trayIcon.setImageAutoSize(true);
       final SystemTray tray = SystemTray.getSystemTray();
 
       MenuItem aboutItem = new MenuItem("About");
@@ -163,7 +168,7 @@ public class Launcher extends JPanel implements DcsNetListener {
       });
 
       tadFrame = new JFrame("TAD Window");
-      //frame.setUndecorated(true);
+      tadFrame.setUndecorated(true);
       tadFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
       //setBorder(BorderFactory.createLineBorder(Color.black));
       GridLayout layout = new GridLayout(1, 1);
@@ -213,7 +218,8 @@ public class Launcher extends JPanel implements DcsNetListener {
 
          @Override
          public void mousePressed(MouseEvent e) {
-
+            startx=e.getX();
+            starty=e.getY();
          }
 
          @Override
@@ -228,6 +234,19 @@ public class Launcher extends JPanel implements DcsNetListener {
 
          @Override
          public void mouseExited(MouseEvent e) {
+
+         }
+      });
+
+      this.addMouseMotionListener(new MouseMotionListener() {
+         @Override
+         public void mouseDragged(MouseEvent e) {
+            tadFrame.setLocation(e.getX() - startx + tadFrame.getLocation().x,
+                                             e.getY() - starty + tadFrame.getLocation().y);
+         }
+
+         @Override
+         public void mouseMoved(MouseEvent e) {
 
          }
       });
@@ -272,7 +291,7 @@ public class Launcher extends JPanel implements DcsNetListener {
          focusedObject = -1;
       }
 
-      g2.setColor(Color.WHITE);
+      g2.setColor(Color.GRAY);
       g2.draw(new Ellipse2D.Double(-1,-1,2,2));
       g2.draw(new Ellipse2D.Double(-0.5,-0.5,1,1));
       g2.setColor(Color.BLUE);
@@ -305,11 +324,20 @@ public class Launcher extends JPanel implements DcsNetListener {
          g2.scale(wpscale, wpscale);
          g2.draw(new Ellipse2D.Double(-1, -1, 2, 2));
          g2.scale(1 / strheight, 1 / strheight);
+         if (focusedObject == -1) {
+            g2.rotate(-aircraftBearing+Math.PI/2);
+         }
          double strwidth = fm.stringWidth(""+wp.id);
          g2.translate(-strwidth, -(strheight - 2 * fm.getAscent()));
          g2.scale(2, 2);
+         if(state.selectedwp==wp.id){
+            g2.setColor(Color.WHITE);
+         }else{
+            g2.setColor(Color.GREEN);
+         }
          g2.drawString(""+wp.id, 0, 0);
          g2.setTransform(trans);
+         g2.setColor(Color.BLUE);
       }
       ArrayList<Waypoint> sortedWps=new ArrayList<Waypoint>();
       int prevMinIndx=-1;

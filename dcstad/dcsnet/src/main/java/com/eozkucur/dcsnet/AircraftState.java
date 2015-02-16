@@ -9,17 +9,19 @@ public class AircraftState {
    public Point pos;
    public double bearing;
    public ArrayList<Waypoint> waypoints=new ArrayList<Waypoint>();
+   public int selectedwp;
 
    static final double EARTH_RADIUS_METER = 6378137.0;
    static final double EARTH_RADIUS_MILES = 3963.190592;
 
    public AircraftState() {
-      this(0,0,0);
+      this(0,0,0,0);
    }
 
-   public AircraftState(float posx, float posy, float bearing) {
+   public AircraftState(float posx, float posy, float bearing,int selectedwp) {
       this.pos=new Point(posx,posy);
       this.bearing = bearing;
+      this.selectedwp=selectedwp;
    }
 
    public static void convertMiles(AircraftState stateRaw,AircraftState stateMiles){
@@ -34,6 +36,7 @@ public class AircraftState {
       stateMiles.pos.x=0;
       stateMiles.pos.y=0;
       stateMiles.bearing=stateRaw.bearing;
+      stateMiles.selectedwp=stateRaw.selectedwp;
       for(int i=0;i<stateMiles.waypoints.size();i++){
          stateMiles.waypoints.get(i).pos=convertToMiles(stateRaw.waypoints.get(i).pos, stateRaw.pos);
          stateMiles.waypoints.get(i).id=stateRaw.waypoints.get(i).id;
