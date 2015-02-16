@@ -384,6 +384,7 @@ public class Launcher extends JPanel implements DcsNetListener {
    public void connectionStateChanged(boolean isConnected) {
       System.out.println("connection " + isConnected);
       connected = isConnected;
+	  this.repaint();
    }
 
    private void stopTad() {
