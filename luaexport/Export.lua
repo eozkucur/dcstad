@@ -32,13 +32,13 @@ function LuaExportStart()
 -- 2) Socket
   package.path  = package.path..";"..lfs.currentdir().."/LuaSocket/?.lua"
   package.cpath = package.cpath..";"..lfs.currentdir().."/LuaSocket/?.dll"
-  socket = require("socket")
-  host = host or "localhost"
-  port = port or 7
-  host = socket.dns.toip(host)
-  c = assert(socket.udp())
-  socket.try(c:setpeername(host, port))
-  socket.try(c:send("Start"))
+  --socket = require("socket")
+  --host = host or "localhost"
+  --port = port or 7
+  --host = socket.dns.toip(host)
+  --c = assert(socket.udp())
+  --socket.try(c:setpeername(host, port))
+  --socket.try(c:send("Start"))
 --  c = socket.try(socket.connect(host, port)) -- connect to the listener socket
 --  c:setoption("tcp-nodelay",true) -- set immediate transmission mode
 --
@@ -70,28 +70,30 @@ function LuaExportBeforeNextFrame()
 
 end
 
+--local ownid
+
 function LuaExportAfterNextFrame()
 -- Works just after every simulation frame.
 
 -- Call Lo*() functions to get data from Lock On here.
 -- For example:
-	local t = LoGetModelTime()
-	local name = LoGetPilotName()
-	local altBar = LoGetAltitudeAboveSeaLevel()
-	local altRad = LoGetAltitudeAboveGroundLevel()
-	local pitch, bank, yaw = LoGetADIPitchBankYaw()
-	local engine = LoGetEngineInfo()
-	local HSI    = LoGetControlPanel_HSI()
+--	local t = LoGetModelTime()
+--	local name = LoGetPilotName()
+--	local altBar = LoGetAltitudeAboveSeaLevel()
+--	local altRad = LoGetAltitudeAboveGroundLevel()
+--	local pitch, bank, yaw = LoGetADIPitchBankYaw()
+--	local engine = LoGetEngineInfo()
+--	local HSI    = LoGetControlPanel_HSI()
 -- Then send data to your file or to your receiving program:
 -- 1) File
- if default_output_file then
-	  default_output_file:write(string.format("t = %.2f, name = %s, altBar = %.2f, altRad = %.2f, pitch = %.2f, bank = %.2f, yaw = %.2f\n", t, name, altBar, altRad, 57.3*pitch, 57.3*bank, 57.3*yaw))
-	  default_output_file:write(string.format("t = %.2f ,RPM left = %f  fuel_internal = %f \n",t,engine.RPM.left,engine.fuel_internal))
+ --if default_output_file then
+	 -- default_output_file:write(string.format("t = %.2f, name = %s, altBar = %.2f, altRad = %.2f, pitch = %.2f, bank = %.2f, yaw = %.2f\n", t, name, altBar, altRad, 57.3*pitch, 57.3*bank, 57.3*yaw))
+	  --default_output_file:write(string.format("t = %.2f ,RPM left = %f  fuel_internal = %f \n",t,engine.RPM.left,engine.fuel_internal))
 --    default_output_file:write(string.format("ADF = %f  RMI = %f\n ",57.3*HSI.ADF,57.3*HSI.RMI))
-	end
+--	end
 -- 2) Socket
-	socket.try(c:send(string.format("t = %.2f, name = %s, altBar = %.2f, alrRad = %.2f, pitch = %.2f, bank = %.2f, yaw = %.2f\n", t, name, altRad, altBar, pitch, bank, yaw)))
-
+	--socket.try(c:send(string.format("t = %.2f, name = %s, altBar = %.2f, alrRad = %.2f, pitch = %.2f, bank = %.2f, yaw = %.2f\n", t, name, altRad, altBar, pitch, bank, yaw)))
+	--ownid=LoGetPlayerPlaneId()
 
 end
 
@@ -105,7 +107,7 @@ function LuaExportStop()
    end
 -- 2) Socket
 --	socket.try(c:send("quit")) -- to close the listener socket
-	c:close()
+	--c:close()
 end
 
 function LuaExportActivityNextEvent(t)
@@ -128,16 +130,23 @@ function LuaExportActivityNextEvent(t)
 	--	for i,cur in pairs(trg) do
 	--	  default_output_file:write(string.format("ID = %d, position = (%f,%f,%f) , V = (%f,%f,%f),flags = 0x%x\n",cur.ID,cur.position.p.x,cur.position.p.y,cur.position.p.z,cur.velocity.x,cur.velocity.y,cur.velocity.z,cur.flags))
 	--	end
-	--	local route = LoGetRoute()
-	--	default_output_file:write(string.format("t = %f\n",t))
-	--	if route then
-	--		  default_output_file:write(string.format("Goto_point :\n point_num = %d ,wpt_pos = (%f, %f ,%f) ,next %d\n",route.goto_point.this_point_num,route.goto_point.world_point.x,route.goto_point.world_point.y,route.goto_point.world_point.z,route.goto_point.next_point_num))
-	--		  default_output_file:write(string.format("Route points:\n"))
-	--		for num,wpt in pairs(route.route) do
-	--		  default_output_file:write(string.format("point_num = %d ,wpt_pos = (%f, %f ,%f) ,next %d\n",wpt.this_point_num,wpt.world_point.x,wpt.world_point.y,wpt.world_point.z,wpt.next_point_num))
-	--		end
-	--	end
-
+		local route = LoGetRoute()
+		default_output_file:write(string.format("t = %f\n",t))
+		if route then
+			  local latlong = LoLoCoordinatesToGeoCoordinates(route.goto_point.world_point.x,route.goto_point.world_point.z)
+			  default_output_file:write(string.format("Goto_point :\n point_num = %d ,wpt_pos = (%f, %f ,%f) ,next %d ll = (%f , %f) name= %s\n",route.goto_point.this_point_num,route.goto_point.world_point.x,route.goto_point.world_point.y,route.goto_point.world_point.z,route.goto_point.next_point_num,latlong.latitude,latlong.longitude,route.goto_point.point_action))
+			  default_output_file:write(string.format("Route points:\n"))
+			for num,wpt in pairs(route.route) do
+			  local latlong   = LoLoCoordinatesToGeoCoordinates(wpt.world_point.x,wpt.world_point.z);
+			  default_output_file:write(string.format("point_num = %d ,wpt_pos = (%f, %f ,%f) ,next %d ll = (%f , %f)\n",wpt.this_point_num,wpt.world_point.x,wpt.world_point.y,wpt.world_point.z,wpt.next_point_num,latlong.latitude,latlong.longitude))
+			end
+		end
+		local selfdata=LoGetSelfData()
+		if selfdata then
+		 --LatLongAlt = { Lat = , Long = , Alt = }
+		    --local latitude,longitude  = LoLoCoordinatesToGeoCoordinates(selfdata.LatLongAlt.Lat,selfdata.LatLongAlt.Long);
+		    default_output_file:write(string.format("self ll = %f , %f\n",selfdata.LatLongAlt.Lat,selfdata.LatLongAlt.Long))
+		end
 	--	local stations = LoGetPayloadInfo()
 	--	if stations then
 	--		default_output_file:write(string.format("Current = %d \n",stations.CurrentStation))
@@ -167,7 +176,7 @@ function LuaExportActivityNextEvent(t)
 --	for k,v in pairs(o) do
 --      socket.try(c:send(string.format("t = %.2f, ID = %d, name = %s, country = %s(%s), LatLongAlt = (%f, %f, %f), heading = %f\n", t, k, v.Name, v.Country, v.Coalition, v.LatLongAlt.x, v.LatLongAlt.Long, v.LatLongAlt.Alt, v.Heading)))
 --	end
---	tNext = tNext + 1.0
+	tNext = tNext + 0.5
 
 	return tNext
 end
@@ -1060,3 +1069,29 @@ To be continued...
 --                                      "mfd2"    - not used
 --                                      "mfd3"    - not used
 --                                      "mirrors" - mirrors
+
+
+
+--~ ProductName: DCS
+--~ FileVersion: 1.2.14.36041
+--~ ProductVersion: 1.2.14.36041
+--~ t = 0.000000
+--~ Goto_point :
+--~  point_num = 1 ,wpt_pos = (-324113.906250, 1018.000000 ,618735.250000) ,next 2 ll = (41.890641 , 41.654361) name= TURNPOINT
+--~ Route points:
+--~ point_num = 1 ,wpt_pos = (-324113.906250, 1018.000000 ,618735.250000) ,next 2 ll = (41.890641 , 41.654361)
+--~ point_num = 2 ,wpt_pos = (-321035.718750, 518.000000 ,627192.437500) ,next 3 ll = (41.910345 , 41.758895)
+--~ point_num = 3 ,wpt_pos = (-317957.531250, 18.000000 ,635649.687500) ,next 4 ll = (41.929946 , 41.863480)
+--~ point_num = 4 ,wpt_pos = (-318339.750000, 18.000000 ,634511.812500) ,next -1 ll = (41.927599 , 41.849445)
+--~ self ll = 42.346981 , 41.820520
+--~ t = 0.500000
+--~ Goto_point :
+--~  point_num = 2 ,wpt_pos = (-256542.859375, 2000.000000 ,612742.875000) ,next -1 ll = (42.497716 , 41.665378) name= TURNPOINT
+--~ Route points:
+--~ self ll = 42.347474 , 41.820014
+--~ t = 1.000000
+--~ Goto_point :
+--~  point_num = 2 ,wpt_pos = (-256542.859375, 2000.000000 ,612742.875000) ,next -1 ll = (42.497716 , 41.665378) name= TURNPOINT
+--~ Route points:
+--~ self ll = 42.347966 , 41.819509
+--~ t = 1.500000
