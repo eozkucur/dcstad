@@ -272,7 +272,7 @@ public class Launcher extends JPanel implements DcsNetListener {
    }
 
    public void paintComponent(Graphics g) {
-      System.out.println("Repaint " + this.getWidth() + " " + this.getHeight());
+      //System.out.println("Repaint " + this.getWidth() + " " + this.getHeight());
       super.paintComponent(g);
       Graphics2D g2 = (Graphics2D) g;
       g2.translate(this.getWidth() / 2, this.getHeight() / 2);
@@ -356,6 +356,9 @@ public class Launcher extends JPanel implements DcsNetListener {
       for(int i=1;i<sortedWps.size();i++){
          g2.draw(new Line2D.Double(sortedWps.get(i-1).pos.x/mileScale,-sortedWps.get(i-1).pos.y/mileScale,sortedWps.get(i).pos.x/mileScale,-sortedWps.get(i).pos.y/mileScale));
       }
+      if(sortedWps.size()>=2){
+         g2.draw(new Line2D.Double(sortedWps.get(sortedWps.size()-1).pos.x/mileScale,-sortedWps.get(sortedWps.size()-1).pos.y/mileScale,sortedWps.get(0).pos.x/mileScale,-sortedWps.get(0).pos.y/mileScale));
+      }
 
       g2.setColor(Color.WHITE);
       Point northPoint=new Point(0,mileScale/2);
@@ -391,19 +394,19 @@ public class Launcher extends JPanel implements DcsNetListener {
 
    @Override
    public void dataChanged() {
-      System.out.println("Data changed");
-      System.out.print("State: ");
-      System.out.print(state.pos.x + ",");
-      System.out.print(state.pos.y + ",");
-      System.out.print(state.bearing + " wp count: ");
-      System.out.print(state.waypoints.size() + ": ");
-      for (int i = 0; i < state.waypoints.size(); i++) {
-         Waypoint wp = state.waypoints.get(i);
-         System.out.print(wp.pos.x + ",");
-         System.out.print(wp.pos.y + ",");
-         System.out.print(wp.id + " ");
-      }
-      System.out.println();
+      //System.out.println("Data changed");
+      //System.out.print("State: ");
+      //System.out.print(state.pos.x + ",");
+      //System.out.print(state.pos.y + ",");
+      //System.out.print(state.bearing + " wp count: ");
+      //System.out.print(state.waypoints.size() + ": ");
+      //for (int i = 0; i < state.waypoints.size(); i++) {
+      //   Waypoint wp = state.waypoints.get(i);
+      //   System.out.print(wp.pos.x + ",");
+      //   System.out.print(wp.pos.y + ",");
+      //   System.out.print(wp.id + " ");
+      //}
+      //System.out.println();
       AircraftState.convertMiles(stateRaw, state);
       //state=stateRaw;
       this.repaint();

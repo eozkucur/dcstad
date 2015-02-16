@@ -96,6 +96,7 @@ public class DcsNet implements Runnable, ServiceListener {
       this.discover = discover;
       if (!discover) {
          this.serverAddress = "127.0.0.1";
+         //this.serverAddress = "192.168.1.50";
       }
       synchronized (this) {
          clientEnabled = true;
@@ -333,7 +334,6 @@ public class DcsNet implements Runnable, ServiceListener {
             recBuffSize = 0;
             if (clientSocket != null) {
                try {
-                  System.out.println("receiving");
                   receivedPacket.setData(recBuff, 0, 1024);
                   clientSocket.receive(receivedPacket);
                   recBuffSize = receivedPacket.getLength();
@@ -350,14 +350,12 @@ public class DcsNet implements Runnable, ServiceListener {
                }
             } else {
                try {
-                  System.out.println("Waiting datagram socket");
                   Thread.sleep(timeoutDur);
                } catch (InterruptedException e) {
                   e.printStackTrace();
                }
             }
             if (recBuffSize > 0) {
-               System.out.println("Received");
                inBuffStream.reset();
                try {
                   state.pos.x=unpacker.readFloat();
@@ -389,10 +387,8 @@ public class DcsNet implements Runnable, ServiceListener {
                   if (recBuffSize >0) {
                      DatagramPacket packet = null;
                      try {
-                        System.out.println("sending");
                         packet = new DatagramPacket(recBuff, 0, recBuffSize, InetAddress.getByName(clientAddress), servingPort);
                         serverSendSocket.send(packet);
-                        System.out.println("sent to client");
                      } catch (UnknownHostException e) {
                         e.printStackTrace();
                      } catch (IOException e) {

@@ -16,17 +16,23 @@ local isconnected=0
 local clientip
 local clientport
 
-local aircraftstate={["posx"]=41.844450,["posy"]=41.955505,["bearing"]=15,["waypoints"]={
-    {["id"]=1,["posx"]=41.777159,["posy"]=41.986136},
-    {["id"]=2,["posx"]=41.895949,["posy"]=41.899566},
-    {["id"]=3,["posx"]=41.991049,["posy"]=41.976693},
-    {["id"]=4,["posx"]=42.098166,["posy"]=41.933544}}}
+local aircraftstate={["posx"]=41.844450,["posy"]=41.955505,["bearing"]=0.3,["waypoints"]={
+    ["10"]={["id"]=1,["posx"]=41.777159,["posy"]=41.986136},
+    ["20"]={["id"]=2,["posx"]=41.895949,["posy"]=41.899566},
+    ["30"]={["id"]=3,["posx"]=41.991049,["posy"]=41.976693},
+    ["40"]={["id"]=4,["posx"]=42.098166,["posy"]=41.933544}},["selectedwp"]=2}
 
 function init()
     print("init")
     tcpserver=socket.bind("*", 5556)
     tcpserver:settimeout(timout)
     udpserver = socket.udp()
+end
+
+function tablecount(tbl)
+    local c=0
+    for k,v in pairs(tbl) do c=c+1 end
+    return c
 end
 
 function update()
@@ -40,16 +46,19 @@ function update()
         else
             print("sending")
             local buffer={}
-            mp.packers['double'](buffer,aircraftstate['posx'])
-            mp.packers['double'](buffer,aircraftstate['posy'])
-            mp.packers['double'](buffer,aircraftstate['bearing'])
-            mp.packers['signed'](buffer,#aircraftstate['waypoints'])
+            mp.packers['float'](buffer,aircraftstate['posx'])
+            mp.packers['float'](buffer,aircraftstate['posy'])
+            mp.packers['float'](buffer,aircraftstate['bearing'])
+            mp.packers['signed'](buffer,tablecount(aircraftstate['waypoints']))
+            print("wpcount: ")
+            print(tablecount(aircraftstate['waypoints']))
             --mp.packers['signed'](buffer,table.getn(aircraftstate['waypoints']))
-            for _,v in ipairs(aircraftstate['waypoints']) do
-                mp.packers['double'](buffer,v['posx'])
-                mp.packers['double'](buffer,v['posy'])
+            for _,v in pairs(aircraftstate['waypoints']) do
+                mp.packers['float'](buffer,v['posx'])
+                mp.packers['float'](buffer,v['posy'])
                 mp.packers['signed'](buffer,v['id'])
             end
+            mp.packers['signed'](buffer,aircraftstate['selectedwp'])
             --bufferraw=table.tconcat(buffer)
             udpserver:sendto(table.concat(buffer), clientip, 5555)
         end
@@ -98,6 +107,8 @@ for i=1,10000 do
     sleep(0.1)
 end
 
+--stat={["a"]=2,["b"]=3,["c"]={},["d"]=4 }
+--print(tablecount(stat["c"]))
 --packer.write(state.pos.x);
 --packer.write(state.pos.y);
 --packer.write(state.bearing);
