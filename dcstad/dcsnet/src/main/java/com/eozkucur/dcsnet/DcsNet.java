@@ -360,9 +360,9 @@ public class DcsNet implements Runnable, ServiceListener {
                System.out.println("Received");
                inBuffStream.reset();
                try {
-                  state.pos.x=unpacker.readDouble();
-                  state.pos.y=unpacker.readDouble();
-                  state.bearing=unpacker.readDouble();
+                  state.pos.x=unpacker.readFloat();
+                  state.pos.y=unpacker.readFloat();
+                  state.bearing=unpacker.readFloat();
                   int wpSize=unpacker.readInt();
                   while(state.waypoints.size()>wpSize){
                      state.waypoints.remove(state.waypoints.size()-1);
@@ -371,8 +371,8 @@ public class DcsNet implements Runnable, ServiceListener {
                      state.waypoints.add(new Waypoint());
                   }
                   for(int i=0;i<wpSize;i++){
-                     state.waypoints.get(i).pos.x=unpacker.readDouble();
-                     state.waypoints.get(i).pos.y=unpacker.readDouble();
+                     state.waypoints.get(i).pos.x=unpacker.readFloat();
+                     state.waypoints.get(i).pos.y=unpacker.readFloat();
                      state.waypoints.get(i).id=unpacker.readInt();
                   }
                } catch (IOException e) {

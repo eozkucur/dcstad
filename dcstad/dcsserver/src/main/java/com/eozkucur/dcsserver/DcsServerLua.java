@@ -50,14 +50,14 @@ public class DcsServerLua {
          wp.pos.x=42.098166;
          state.waypoints.add(wp);
 
-         packer.write(state.pos.x);
-         packer.write(state.pos.y);
-         packer.write(state.bearing);
+         packer.write((float)state.pos.x);
+         packer.write((float)state.pos.y);
+         packer.write((float)state.bearing);
          packer.write(state.waypoints.size());
          for(int i=0;i<state.waypoints.size();i++){
             wp=state.waypoints.get(i);
-            packer.write(wp.pos.x);
-            packer.write(wp.pos.y);
+            packer.write((float)wp.pos.x);
+            packer.write((float)wp.pos.y);
             packer.write(wp.id);
          }
          byte[] buf=bout.toByteArray();

@@ -26,9 +26,9 @@
     </content>
     <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" name="jmdns-3.4.2-r353-1" level="project" />
-    <orderEntry type="library" exported="" name="msgpack-0.6.11" level="project" />
-    <orderEntry type="library" exported="" name="json-simple-1.1.1" level="project" />
-    <orderEntry type="library" exported="" name="javassist-3.18.1-GA" level="project" />
+    <orderEntry type="library" exported="" name="Gradle: com.github.rickyclarkson:jmdns:3.4.2-r353-1" level="project" />
+    <orderEntry type="library" exported="" name="Gradle: org.msgpack:msgpack:0.6.11" level="project" />
+    <orderEntry type="library" exported="" name="Gradle: com.googlecode.json-simple:json-simple:1.1.1" level="project" />
+    <orderEntry type="library" exported="" name="Gradle: org.javassist:javassist:3.18.1-GA" level="project" />
   </component>
 </module>

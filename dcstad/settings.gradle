@@ -1,1 +1,1 @@
-include  ':dcsserver', ':dcsnet'
+include  ':dcsserver', ':dcsnet' , ':androidapp'
