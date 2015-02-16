@@ -65,7 +65,7 @@ public class Launcher extends JPanel implements DcsNetListener {
    GeneralPath aircraftDrawPath;
    GeneralPath northDrawPath;
 
-   double mileScale = 20;
+   double mileScale = 10;
 
    int focusedObject = -1;
 
