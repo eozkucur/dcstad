@@ -4,10 +4,10 @@ package com.eozkucur.dcsnet;
  * Created by ergin.ozkucur on 14/02/15.
  */
 public class Point {
-   public double x;
-   public double y;
+   public float x;
+   public float y;
 
-   public Point(double x, double y) {
+   public Point(float x, float y) {
       this.x = x;
       this.y = y;
    }

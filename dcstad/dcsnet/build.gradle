@@ -5,3 +5,5 @@ dependencies {
    compile 'com.github.rickyclarkson:jmdns:3.4.2-r353-1'
    compile 'org.msgpack:msgpack:0.6.11'
 }
+targetCompatibility = JavaVersion.VERSION_1_6
+sourceCompatibility = JavaVersion.VERSION_1_6

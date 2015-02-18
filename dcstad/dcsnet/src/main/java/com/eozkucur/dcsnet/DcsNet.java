@@ -73,12 +73,18 @@ public class DcsNet implements Runnable, ServiceListener {
 
    AircraftState state;
 
+   InetAddress jmdnsaddr;
+
    public DcsNet(int localListenPort, int servingPort,AircraftState state) {
       this.state=state;
       this.clientListenPort = localListenPort;
       this.servingPort = servingPort;
       thread = new Thread(this);
       thread.start();
+   }
+
+   public void setJmdnsaddr(InetAddress jmdnsaddr) {
+      this.jmdnsaddr = jmdnsaddr;
    }
 
    public void addListener(DcsNetListener listener) {
@@ -100,16 +106,28 @@ public class DcsNet implements Runnable, ServiceListener {
       }
       synchronized (this) {
          clientEnabled = true;
-         this.notifyAll();
+         notifyAll();
       }
       clientThread = new Thread(new Runnable() {
          @Override
          public void run() {
+            if (DcsNet.this.discover && jmdnClient == null) {
+               try {
+                  if(jmdnsaddr!=null) {
+                     jmdnClient = JmDNS.create(jmdnsaddr);
+                  }else{
+                     jmdnClient = JmDNS.create();
+                  }
+               } catch (IOException e) {
+                  e.printStackTrace();
+               }
+               jmdnClient.addServiceListener(discoverString, DcsNet.this);
+            }
             clientCommandSocket = null;
             boolean clEnabled = clientEnabled;
+            System.out.println("Waiting for a server");
             while (clEnabled) {
                try {
-                  System.out.println("Waiting for a server");
                   clientCommandSocket = new Socket(serverAddress, clientListenPort + 1);
                   System.out.println("Connected to server");
                   if (clientSocket == null) {
@@ -158,17 +176,19 @@ public class DcsNet implements Runnable, ServiceListener {
                clientSocket.close();
                clientSocket = null;
             }
+            if (jmdnClient != null) {
+               jmdnClient.removeServiceListener(discoverString, DcsNet.this);
+               try {
+                  jmdnClient.close();
+               } catch (IOException e) {
+                  e.printStackTrace();
+               }
+               jmdnClient = null;
+            }
          }
       });
       clientThread.start();
-      if (discover && jmdnClient == null) {
-         try {
-            jmdnClient = JmDNS.create();
-         } catch (IOException e) {
-            e.printStackTrace();
-         }
-         jmdnClient.addServiceListener(discoverString, this);
-      }
+
    }
 
    public void stopClient() {
@@ -189,15 +209,7 @@ public class DcsNet implements Runnable, ServiceListener {
          clientSocket.close();
          clientSocket = null;
       }
-      if (jmdnClient != null) {
-         jmdnClient.removeServiceListener(discoverString, this);
-         try {
-            jmdnClient.close();
-         } catch (IOException e) {
-            e.printStackTrace();
-         }
-         jmdnClient = null;
-      }
+
       try {
          if (clientThread != null) {
             clientThread.join();
@@ -264,7 +276,7 @@ public class DcsNet implements Runnable, ServiceListener {
          serverThread.start();
          if (jmdnServer == null) {
             jmdnServer = JmDNS.create();
-            jmdnServer.registerService(ServiceInfo.create(discoverString, "foo", servingPort, "description"));
+            jmdnServer.registerService(ServiceInfo.create(discoverString, "dcstad", servingPort, "description"));
          }
       } catch (IOException e) {
          e.printStackTrace();

@@ -11,7 +11,7 @@ public class Waypoint {
       this(0,0,0);
    }
 
-   public Waypoint(double x, double y, int id) {
+   public Waypoint(float x, float y, int id) {
       this.pos = new Point(x,y);
       this.id = id;
    }

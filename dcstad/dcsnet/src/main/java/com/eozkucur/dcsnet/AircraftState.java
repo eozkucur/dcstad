@@ -7,7 +7,7 @@ import java.util.ArrayList;
  */
 public class AircraftState {
    public Point pos;
-   public double bearing;
+   public float bearing;
    public ArrayList<Waypoint> waypoints=new ArrayList<Waypoint>();
    public int selectedwp;
 
@@ -86,7 +86,7 @@ public class AircraftState {
       //var brng = Math.atan2(y, x).toDegrees();
 
 
-      return new Point((dist*Math.sin(bearing)),(dist*Math.cos(bearing)));
+      return new Point((float)(dist*Math.sin(bearing)),(float)(dist*Math.cos(bearing)));
    }
 
 

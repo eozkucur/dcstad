@@ -26,28 +26,28 @@ public class DcsServerLua {
          //41.899566, 41.895949
          //41.976693, 41.991049
          //41.933544, 42.098166
-         state.pos.y=41.955505;
-         state.pos.x=41.844450;
-         state.bearing=105;
+         state.pos.y=41.955505f;
+         state.pos.x=41.844450f;
+         state.bearing= (float) Math.toRadians(-45);
          Waypoint wp=new Waypoint();
          wp.id=1;
-         wp.pos.y=41.986136;
-         wp.pos.x=41.777159;
+         wp.pos.y=41.986136f;
+         wp.pos.x=41.777159f;
          state.waypoints.add(wp);
          wp=new Waypoint();
          wp.id=2;
-         wp.pos.y=41.899566;
-         wp.pos.x=41.895949;
+         wp.pos.y=41.899566f;
+         wp.pos.x=41.895949f;
          state.waypoints.add(wp);
          wp=new Waypoint();
          wp.id=3;
-         wp.pos.y=41.976693;
-         wp.pos.x=41.991049;
+         wp.pos.y=41.976693f;
+         wp.pos.x=41.991049f;
          state.waypoints.add(wp);
          wp=new Waypoint();
          wp.id=4;
-         wp.pos.y=41.933544;
-         wp.pos.x=42.098166;
+         wp.pos.y=41.933544f;
+         wp.pos.x=42.098166f;
          state.waypoints.add(wp);
          state.selectedwp=2;
 

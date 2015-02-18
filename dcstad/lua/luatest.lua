@@ -101,11 +101,16 @@ end
 
 init()
 
-sleep(0.1)
-for i=1,10000 do
+while 1 do
     update()
     sleep(0.1)
 end
+
+--sleep(0.1)
+--for i=1,10000 do
+--    update()
+--    sleep(0.1)
+--end
 
 --stat={["a"]=2,["b"]=3,["c"]={},["d"]=4 }
 --print(tablecount(stat["c"]))

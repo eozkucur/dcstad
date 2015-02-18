@@ -13,7 +13,7 @@ public class DcsClient implements DcsNetListener{
          System.out.println("Start client");
          DcsClient dcsClient=new DcsClient();
          dcsClient.state=new AircraftState();
-         DcsNet net=new DcsNet(5555,7777,dcsClient.state);
+         DcsNet net=new DcsNet(4455,9988,dcsClient.state);
          net.addListener(dcsClient);
          Thread.sleep(2000);
          net.startClient(true);

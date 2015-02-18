@@ -361,7 +361,7 @@ public class Launcher extends JPanel implements DcsNetListener {
       }
 
       g2.setColor(Color.WHITE);
-      Point northPoint=new Point(0,mileScale/2);
+      Point northPoint=new Point(0, (float) (mileScale/2));
       if(focusedObject==-1){
          northPoint.x+=state.pos.x;
          northPoint.y+=state.pos.y;
@@ -456,6 +456,7 @@ public class Launcher extends JPanel implements DcsNetListener {
       if (tadRunning) {
          trayIcon.setImage(images.get(1));
       } else {
+         net.stopClient();
          trayIcon.setImage(images.get(0));
       }
    }
@@ -468,6 +469,7 @@ public class Launcher extends JPanel implements DcsNetListener {
       if (tadRunning) {
          trayIcon.setImage(images.get(3));
       } else {
+         net.startClient(false);
          trayIcon.setImage(images.get(2));
       }
    }
