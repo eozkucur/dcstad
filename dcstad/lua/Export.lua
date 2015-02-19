@@ -152,11 +152,8 @@ function table_to_string( tbl )
     end
 end
 
-function LuaExportActivityNextEvent(t)
-	local tNext = t
-	--default_output_file:write("step\n")
-
-    if isconnected==1 then
+function ReadAndSendData()
+	if isconnected==1 then
         local line,error=tcpclient:receive()
         if error=="closed" then
             --default_output_file:write("closed\n")
@@ -176,6 +173,7 @@ function LuaExportActivityNextEvent(t)
 				--default_output_file:write(string.format("%s",table_to_string(LoGetWorldObjects())))
 				--default_output_file:write("wings:\n")
 				--default_output_file:write(string.format("%s",table_to_string(LoGetWingInfo())))
+				aircraftstate["airobjects"]={}
 				local allobjects=LoGetWorldObjects()
 				for k,v in pairs(allobjects) do
 					if (v.Type.level1==1 and (v.Type.level2==1 or v.Type.level2==2) and v.CoalitionID==selfdata.CoalitionID and k~=LoGetPlayerPlaneId()) then
@@ -189,7 +187,10 @@ function LuaExportActivityNextEvent(t)
 				end
 				local wings=LoGetWingInfo()
 				for k,v in pairs(wings) do
-					aircraftstate["airobjects"][tonumber(v.wingmen_id)].groupid=0
+					local ao=aircraftstate["airobjects"][tonumber(v.wingmen_id)]
+					if ao then
+						ao.groupid=0
+					end
 				end
 				--default_output_file:write("refined:\n")
 				--default_output_file:write(string.format("%s",table_to_string(aircraftstate)))
@@ -244,8 +245,19 @@ function LuaExportActivityNextEvent(t)
             end
         end
     end
+end
 
-	tNext = tNext + 0.3
+function LuaExportActivityNextEvent(t)
+	local tNext = t
+	--default_output_file:write("step\n")
+
+    local status,err = pcall(ReadAndSendData)
+	
+	if not status then
+		--default_output_file:write("err\n")
+	end
+
+	tNext = tNext + 0.25
 
 	return tNext
 end
