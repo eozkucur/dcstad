@@ -176,7 +176,7 @@ public class TadView extends View implements DcsNetListener,GestureDetector.OnGe
       for(AirObject ao:state.airObjects) {
          canvas.save();
          if(ao.groupId==0){
-            paint.setColor(Color.BLUE);
+            paint.setColor(Color.CYAN);
          }else{
             paint.setColor(Color.GREEN);
          }
