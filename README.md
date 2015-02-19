@@ -49,7 +49,7 @@ The instructions below are for building the project from source. For convenience
     ```
   
   * The output of the PC application is a single jar without any dependency and it is located in `dcstad\dcsserver\build\libs\dcsserver.jar`
-  * The generated android package is located in `dcstad\androidapp\build\outputs\apk\androidapp-release-unsigned.apk`
+  * The generated android package is located in `dcstad\androidapp\build\outputs\apk\androidapp-debug.apk`
   
 ###Usage
 
