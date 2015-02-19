@@ -70,3 +70,10 @@ The instructions below are for building the project from source. For convenience
 * The scale is displayed on the top-right corner. The red color indicates no connection and green indicates connected.
 * In the android app, single tap changes scale and double tap changes the focused object.
 
+###Versions
+
+#####0.2.0
+* Added allied flights to the TAD display
+
+#####0.1.0
+* Initial version
