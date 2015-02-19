@@ -1,5 +1,6 @@
 package com.eozkucur.dcsserver;
 
+import com.eozkucur.dcsnet.AirObject;
 import com.eozkucur.dcsnet.AircraftState;
 import com.eozkucur.dcsnet.Waypoint;
 import java.io.ByteArrayOutputStream;
@@ -21,11 +22,6 @@ public class DcsServerLua {
          MessagePack messagePack=new MessagePack();
          Packer packer=messagePack.createPacker(bout);
          AircraftState state=new AircraftState();
-         //41.955505, 41.844450
-         //41.986136, 41.777159
-         //41.899566, 41.895949
-         //41.976693, 41.991049
-         //41.933544, 42.098166
          state.pos.y=41.955505f;
          state.pos.x=41.844450f;
          state.bearing= (float) Math.toRadians(-45);
@@ -51,6 +47,26 @@ public class DcsServerLua {
          state.waypoints.add(wp);
          state.selectedwp=2;
 
+         AirObject ao=new AirObject();
+         ao.groupId=0;
+         ao.pos.y=41.9779566f;
+         ao.pos.x=41.8775949f;
+         ao.bearing=(float) Math.toRadians(30);
+         state.airObjects.add(ao);
+         ao=new AirObject();
+         ao.groupId=1;
+         ao.pos.y=41.9669566f;
+         ao.pos.x=41.8665949f;
+         ao.bearing=(float) Math.toRadians(0);
+         state.airObjects.add(ao);
+         ao=new AirObject();
+         ao.groupId=1;
+         ao.pos.y=41.9559566f;
+         ao.pos.x=41.8555949f;
+         ao.bearing=(float) Math.toRadians(-30);
+         state.airObjects.add(ao);
+
+
          packer.write((float)state.pos.x);
          packer.write((float)state.pos.y);
          packer.write((float)state.bearing);
@@ -62,6 +78,14 @@ public class DcsServerLua {
             packer.write(wp.id);
          }
          packer.write(state.selectedwp);
+         packer.write(state.airObjects.size());
+         for(int i=0;i<state.airObjects.size();i++){
+            ao=state.airObjects.get(i);
+            packer.write((float)ao.pos.x);
+            packer.write((float)ao.pos.y);
+            packer.write((float)ao.bearing);
+            packer.write(ao.groupId);
+         }
          byte[] buf=bout.toByteArray();
 
          System.out.println("Starting socket");

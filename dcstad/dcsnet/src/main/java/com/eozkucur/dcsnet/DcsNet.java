@@ -386,6 +386,20 @@ public class DcsNet implements Runnable, ServiceListener {
                      state.waypoints.get(i).id=unpacker.readInt();
                   }
                   state.selectedwp=unpacker.readInt();
+
+                  int airObjectSize=unpacker.readInt();
+                  while(state.airObjects.size()>airObjectSize){
+                     state.airObjects.remove(state.airObjects.size()-1);
+                  }
+                  while(state.airObjects.size()<airObjectSize){
+                     state.airObjects.add(new AirObject());
+                  }
+                  for(int i=0;i<airObjectSize;i++){
+                     state.airObjects.get(i).pos.x=unpacker.readFloat();
+                     state.airObjects.get(i).pos.y=unpacker.readFloat();
+                     state.airObjects.get(i).bearing=unpacker.readFloat();
+                     state.airObjects.get(i).groupId=unpacker.readInt();
+                  }
                } catch (IOException e) {
                   e.printStackTrace();
                }

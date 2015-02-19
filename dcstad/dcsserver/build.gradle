@@ -9,6 +9,8 @@ jar {
 }
 
 applicationDefaultJvmArgs = ["-Dapple.awt.UIElement=true"]
+targetCompatibility = JavaVersion.VERSION_1_7
+sourceCompatibility = JavaVersion.VERSION_1_7
 
 dependencies {
    compile fileTree(dir: 'libs', include: ['*.jar'])

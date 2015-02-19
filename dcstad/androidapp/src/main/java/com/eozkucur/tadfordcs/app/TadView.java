@@ -12,6 +12,7 @@ import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import com.eozkucur.dcsnet.AirObject;
 import com.eozkucur.dcsnet.AircraftState;
 import com.eozkucur.dcsnet.DcsNet;
 import com.eozkucur.dcsnet.DcsNetListener;
@@ -28,7 +29,7 @@ public class TadView extends View implements DcsNetListener,GestureDetector.OnGe
 
    AircraftState stateRaw=new AircraftState();
    AircraftState state=new AircraftState();
-   DcsNet dcsnet=new DcsNet(7777,8899,stateRaw);
+   DcsNet dcsnet=new DcsNet(5555,8899,stateRaw);
 
    private boolean connected;
 
@@ -171,6 +172,21 @@ public class TadView extends View implements DcsNetListener,GestureDetector.OnGe
       paint.setStyle(Paint.Style.FILL);
       canvas.drawPath(aircraftDrawPath, paint);
       canvas.restore();
+
+      for(AirObject ao:state.airObjects) {
+         canvas.save();
+         if(ao.groupId==0){
+            paint.setColor(Color.BLUE);
+         }else{
+            paint.setColor(Color.GREEN);
+         }
+         canvas.translate(ao.pos.x / mileScale, -ao.pos.y / mileScale);
+         canvas.rotate((float)Math.toDegrees(ao.bearing)-90);
+         canvas.scale(aircraftScale/2, aircraftScale/2);
+         canvas.drawPath(aircraftDrawPath, paint);
+         canvas.restore();
+      }
+      paint.setColor(Color.BLUE);
 
       if(heightInv==0){
          String wpStr="8";

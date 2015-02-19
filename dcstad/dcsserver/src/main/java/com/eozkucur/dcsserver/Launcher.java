@@ -1,6 +1,7 @@
 
 package com.eozkucur.dcsserver;
 
+import com.eozkucur.dcsnet.AirObject;
 import com.eozkucur.dcsnet.AircraftState;
 import com.eozkucur.dcsnet.DcsNet;
 import com.eozkucur.dcsnet.DcsNetListener;
@@ -298,7 +299,8 @@ public class Launcher extends JPanel implements DcsNetListener {
       AffineTransform trans2=g2.getTransform();
 
       //double aircraftBearing=  Math.toRadians(-state.bearing+90);
-      double aircraftBearing=  -state.bearing+Math.PI/2;
+      float halfpi= (float) (Math.PI/2);
+      double aircraftBearing=  -state.bearing+halfpi;
       double aircraftScale=0.05f;
       if (focusedObject == -1) {
          g2.rotate(aircraftBearing-Math.PI/2);
@@ -313,6 +315,21 @@ public class Launcher extends JPanel implements DcsNetListener {
       g2.fill(aircraftDrawPath);
       g2.setTransform(trans);
 
+      for(AirObject ao:state.airObjects){
+         AffineTransform trans3=g2.getTransform();
+         if(ao.groupId==0){
+            g2.setColor(Color.BLUE);
+         }else{
+            g2.setColor(Color.GREEN);
+         }
+         g2.translate(ao.pos.x / mileScale, -ao.pos.y / mileScale);
+         g2.rotate(ao.bearing-halfpi);
+         g2.scale(aircraftScale/2, aircraftScale/2);
+         g2.fill(aircraftDrawPath);
+         g2.setTransform(trans3);
+      }
+      g2.setColor(Color.BLUE);
+
 
       FontMetrics fm = g2.getFontMetrics();
       double strheight = fm.getHeight();
@@ -325,7 +342,7 @@ public class Launcher extends JPanel implements DcsNetListener {
          g2.draw(new Ellipse2D.Double(-1, -1, 2, 2));
          g2.scale(1 / strheight, 1 / strheight);
          if (focusedObject == -1) {
-            g2.rotate(-aircraftBearing+Math.PI/2);
+            g2.rotate(-aircraftBearing+halfpi);
          }
          double strwidth = fm.stringWidth(""+wp.id);
          g2.translate(-strwidth, -(strheight - 2 * fm.getAscent()));
@@ -371,7 +388,7 @@ public class Launcher extends JPanel implements DcsNetListener {
       }
       trans = g2.getTransform();
       g2.translate((northPoint.x/mileScale), -(northPoint.y/mileScale));
-      g2.rotate(Math.PI / 2);
+      g2.rotate(halfpi);
       g2.scale(wpscale*2, wpscale*2);
       g2.fill(northDrawPath);
       g2.setTransform(trans);

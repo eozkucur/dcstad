@@ -10,6 +10,7 @@ public class AircraftState {
    public float bearing;
    public ArrayList<Waypoint> waypoints=new ArrayList<Waypoint>();
    public int selectedwp;
+   public ArrayList<AirObject> airObjects=new ArrayList<AirObject>();
 
    static final double EARTH_RADIUS_METER = 6378137.0;
    static final double EARTH_RADIUS_MILES = 3963.190592;
@@ -33,13 +34,27 @@ public class AircraftState {
          stateMiles.waypoints.add(new Waypoint());
       }
 
+      while(stateMiles.airObjects.size()>stateRaw.airObjects.size()){
+         stateMiles.airObjects.remove(stateMiles.airObjects.size()-1);
+      }
+      while(stateMiles.airObjects.size()<stateRaw.airObjects.size()){
+         stateMiles.airObjects.add(new AirObject());
+      }
+
       stateMiles.pos.x=0;
       stateMiles.pos.y=0;
       stateMiles.bearing=stateRaw.bearing;
       stateMiles.selectedwp=stateRaw.selectedwp;
+
       for(int i=0;i<stateMiles.waypoints.size();i++){
          stateMiles.waypoints.get(i).pos=convertToMiles(stateRaw.waypoints.get(i).pos, stateRaw.pos);
          stateMiles.waypoints.get(i).id=stateRaw.waypoints.get(i).id;
+      }
+
+      for(int i=0;i<stateMiles.airObjects.size();i++){
+         stateMiles.airObjects.get(i).pos=convertToMiles(stateRaw.airObjects.get(i).pos, stateRaw.pos);
+         stateMiles.airObjects.get(i).groupId=stateRaw.airObjects.get(i).groupId;
+         stateMiles.airObjects.get(i).bearing=stateRaw.airObjects.get(i).bearing;
       }
 
    }
