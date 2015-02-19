@@ -318,7 +318,7 @@ public class Launcher extends JPanel implements DcsNetListener {
       for(AirObject ao:state.airObjects){
          AffineTransform trans3=g2.getTransform();
          if(ao.groupId==0){
-            g2.setColor(Color.BLUE);
+            g2.setColor(Color.CYAN);
          }else{
             g2.setColor(Color.GREEN);
          }
