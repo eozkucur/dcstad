@@ -5,7 +5,7 @@
 
 This is a simple Tactical Awareness Display (TAD) for Digital Combat Simulator (DCS) F-15C and possibly other modules. It includes export scripts, a PC component for displaying TAD view (and function as a server) and an android app. The android app has a discovery mechanism and no IP configuration is required. 
 
-The instructions below are for building the project from source. For convenience, the compiled binaries can be downloaded from [Google Drive](https://drive.google.com/file/d/0B4PB2bLD-iWTbVFxUFR5WVlzM0U/view?usp=sharing) and [DCS website](http://www.digitalcombatsimulator.com/en/files/1277731/).
+The instructions below are for building the project from source. For convenience, the compiled binaries can be downloaded from [DCS website](http://www.digitalcombatsimulator.com/en/files/1277731/).
 
 ###Requirements
 
