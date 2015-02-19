@@ -23,15 +23,7 @@ require 'Vector'
 
 local default_output_file = nil
 
---local aircraftstate={["posx"]=41.844450,["posy"]=41.955505,["bearing"]=15,["waypoints"]={
---    {["id"]=1,["posx"]=41.777159,["posy"]=41.986136},
---    {["id"]=2,["posx"]=41.895949,["posy"]=41.899566},
---    {["id"]=3,["posx"]=41.991049,["posy"]=41.976693},
---    {["id"]=4,["posx"]=42.098166,["posy"]=41.933544} }}
-
 local aircraftstate
-local started
-
 local socket
 local mp
 local tcpserver
@@ -44,20 +36,12 @@ local clientport
 local prevLat,prevLong
 
 function LuaExportStart()
-	aircraftstate={["posx"]=41.844450,["posy"]=41.955505,["bearing"]=0.2,["selectedwp"]=0,["waypoints"]={}}
-	--aircraftstate={["posx"]=41.84,["posy"]=41.95,["bearing"]=15,["waypoints"]={ }}
-	started=0
+	aircraftstate={["posx"]=41.844450,["posy"]=41.955505,["bearing"]=0.2,["selectedwp"]=0,["waypoints"]={},["airobjects"]={}}
 	timout=0.001
 	isconnected=0
--- Works once just before mission start.
--- Make initializations of your files or connections here.
--- For example:
--- 1) File
+
     default_output_file = io.open(lfs.writedir().."/Logs/Export.log", "w")
 
--- 2) Socket
---  package.path  = package.path..";"..lfs.currentdir().."/LuaSocket/?.lua"
-  --package.cpath = package.cpath..";"..lfs.currentdir().."/LuaSocket/?.dll"
 	package.path  = package.path..";"..lfs.currentdir().."/LuaSocket/?.lua"
 	package.cpath = package.cpath..";"..lfs.currentdir().."/LuaSocket/?.dll"
 	package.path  = package.path..";"..lfs.writedir().."/Scripts/MessagePack/?.lua"
@@ -65,32 +49,6 @@ function LuaExportStart()
 	socket = require("socket")
 	mp = require("MessagePack")
     default_output_file:write(string.format("Start\n"))
-
-  --host = host or "localhost"
-  --port = port or 7
-  --host = socket.dns.toip(host)
-  --c = assert(socket.udp())
-  --socket.try(c:setpeername(host, port))
-  --socket.try(c:send("Start"))
---  c = socket.try(socket.connect(host, port)) -- connect to the listener socket
---  c:setoption("tcp-nodelay",true) -- set immediate transmission mode
---
--- 	local version = LoGetVersionInfo() --request current version info (as it showed by Windows Explorer fo DCS.exe properties)
---    if version and default_output_file then
---
--- 		default_output_file:write("ProductName: "..version.ProductName..'\n')
--- 		default_output_file:write(string.format("FileVersion: %d.%d.%d.%d\n",
--- 												version.FileVersion[1],
--- 												version.FileVersion[2],
--- 												version.FileVersion[3],
--- 												version.FileVersion[4]))
--- 		default_output_file:write(string.format("ProductVersion: %d.%d.%d.%d\n",
--- 												version.ProductVersion[1],
--- 												version.ProductVersion[2],
--- 												version.ProductVersion[3],  -- head  revision (Continuously growth)
---												version.ProductVersion[4])) -- build number   (Continuously growth)
---    end
-
 
     tcpserver=socket.bind("*", 5556)
     tcpserver:settimeout(timout)
@@ -131,20 +89,18 @@ function LuaExportAfterNextFrame()
 -- 2) Socket
 	--socket.try(c:send(string.format("t = %.2f, name = %s, altBar = %.2f, alrRad = %.2f, pitch = %.2f, bank = %.2f, yaw = %.2f\n", t, name, altRad, altBar, pitch, bank, yaw)))
 	--ownid=LoGetPlayerPlaneId()
-
 end
 
 function LuaExportStop()
--- Works once just after mission stop.
--- Close files and/or connections here.
--- 1) File
    if default_output_file then
 	  default_output_file:close()
 	  default_output_file = nil
    end
--- 2) Socket
---	socket.try(c:send("quit")) -- to close the listener socket
-	--c:close()
+   if tcpclient then
+	 socket.try(tcpclient:close())
+   end
+   socket.try(tcpserver:close())
+   socket.try(udpserver:close())
 end
 
 function tablecount(tbl)
@@ -153,114 +109,52 @@ function tablecount(tbl)
    return c
 end
 
+function table_print (tt, indent, done)
+  done = done or {}
+  indent = indent or 0
+  if type(tt) == "table" then
+    local sb = {}
+    for key, value in pairs (tt) do
+      table.insert(sb, string.rep (" ", indent)) -- indent it
+      if type (value) == "table" and not done [value] then
+        done [value] = true
+		if "number" == type(key) then
+			table.insert(sb, string.format("%d = {\n",tostring(key)));
+		else
+			table.insert(sb, string.format("%s = {\n",tostring(key)));
+		end
+        --table.insert(sb, "{\n");
+        table.insert(sb, table_print (value, indent + 2, done))
+        table.insert(sb, string.rep (" ", indent)) -- indent it
+        table.insert(sb, "}\n");
+      elseif "number" == type(key) then
+        table.insert(sb, string.format("%d = \"%s\"\n",tostring (key), tostring(value)))
+      else
+        table.insert(sb, string.format(
+            "%s = \"%s\"\n", tostring (key), tostring(value)))
+       end
+    end
+    return table.concat(sb)
+  else
+    return tt .. "\n"
+  end
+end
+
+function table_to_string( tbl )
+    if  "nil"       == type( tbl ) then
+        return tostring(nil)
+    elseif  "table" == type( tbl ) then
+        return table_print(tbl)
+    elseif  "string" == type( tbl ) then
+        return tbl
+    else
+        return tostring(tbl)
+    end
+end
+
 function LuaExportActivityNextEvent(t)
 	local tNext = t
-
-
-    local selfdata=LoGetSelfData()
-
-    if selfdata then
-        --LatLongAlt = { Lat = , Long = , Alt = }
-        --local latitude,longitude  = LoLoCoordinatesToGeoCoordinates(selfdata.LatLongAlt.Lat,selfdata.LatLongAlt.Long);
-        --default_output_file:write(string.format("self ll = %f , %f\n",selfdata.LatLongAlt.Lat,selfdata.LatLongAlt.Long))
-        if (prevLat~=nil and prevLong~=nil) and (selfdata.LatLongAlt.Lat~=prevLat or selfdata.LatLongAlt.Long~=prevLong) then
-            started=1
-        end
-        prevLat=selfdata.LatLongAlt.Lat
-        prevLong=selfdata.LatLongAlt.Long
-        aircraftstate["posy"]=selfdata.LatLongAlt.Lat;
-        aircraftstate["posx"]=selfdata.LatLongAlt.Long;
-        aircraftstate["bearing"]=selfdata.Heading;
-    end
-    --if started==1 then
-        --default_output_file:write("Started\n")
-        local route = LoGetRoute()
-        if route then
-            --default_output_file:write("Have route\n")
-            local latlong = LoLoCoordinatesToGeoCoordinates(route.goto_point.world_point.x,route.goto_point.world_point.z)
-            --default_output_file:write(string.format("Goto_point :\n point_num = %d ,wpt_pos = (%f, %f ,%f) ,next %d ll = (%f , %f) name= %s\n",route.goto_point.this_point_num,route.goto_point.world_point.x,route.goto_point.world_point.y,route.goto_point.world_point.z,route.goto_point.next_point_num,latlong.latitude,latlong.longitude,route.goto_point.point_action))
-			local wp={}
-            wp["posy"]=latlong.latitude
-            wp["posx"]=latlong.longitude
-            wp["id"]=route.goto_point.this_point_num-1
-            aircraftstate["waypoints"][wp["id"]]=wp
-			aircraftstate["selectedwp"]=wp["id"]
---~             default_output_file:write(string.format("Route points:\n"))
---~             if #route.route>0 then
---~                 aircraftstate["waypoints"]={}
---~             end
---~             for num,wpt in pairs(route.route) do
---~                 local latlong   = LoLoCoordinatesToGeoCoordinates(wpt.world_point.x,wpt.world_point.z);
---~                 --default_output_file:write(string.format("point_num = %d ,wpt_pos = (%f, %f ,%f) ,next %d ll = (%f , %f)\n",wpt.this_point_num,wpt.world_point.x,wpt.world_point.y,wpt.world_point.z,wpt.next_point_num,latlong.latitude,latlong.longitude))
---~                 local wp={}
---~                 wp["posy"]=latlong.latitude
---~                 wp["posx"]=latlong.longitude
---~                 wp["id"]=wpt.this_point_num
---~                 aircraftstate["waypoints"][#aircraftstate["waypoints"]+1]=wp
---~             end
-        else
-            --default_output_file:write("No route\n")
-        end
-    --else
-    --    default_output_file:write("Not started\n")
-    --end
-
-
-
--- Put your event code here and increase tNext for the next event
--- so this function will be called automatically at your custom
--- model times.
--- If tNext == t then the activity will be terminated.
-
--- For example:
--- 1) File
---  if default_output_file then
-	--	local o = LoGetWorldObjects()
-	--		for k,v in pairs(o) do
-	--			default_output_file:write(string.format("t = %.2f, ID = %d, name = %s, country = %s(%s), LatLongAlt = (%f, %f, %f), heading = %f\n", t, k, v.Name, v.Country, v.Coalition, v.LatLongAlt.Lat, v.LatLongAlt.Long, v.LatLongAlt.Alt, v.Heading))
-	--		end
-	--	local trg = LoGetLockedTargetInformation()
-	--  default_output_file:write(string.format("locked targets ,time = %.2f\n",t))
-	--	for i,cur in pairs(trg) do
-	--	  default_output_file:write(string.format("ID = %d, position = (%f,%f,%f) , V = (%f,%f,%f),flags = 0x%x\n",cur.ID,cur.position.p.x,cur.position.p.y,cur.position.p.z,cur.velocity.x,cur.velocity.y,cur.velocity.z,cur.flags))
-	--	end
-	--	local route = LoGetRoute()
-	--	default_output_file:write(string.format("t = %f\n",t))
-	--	if route then
-	--		  local latlong = LoLoCoordinatesToGeoCoordinates(route.goto_point.world_point.x,route.goto_point.world_point.z)
-	--		  default_output_file:write(string.format("Goto_point :\n point_num = %d ,wpt_pos = (%f, %f ,%f) ,next %d ll = (%f , %f) name= %s\n",route.goto_point.this_point_num,route.goto_point.world_point.x,route.goto_point.world_point.y,route.goto_point.world_point.z,route.goto_point.next_point_num,latlong.latitude,latlong.longitude,route.goto_point.point_action))
-	--		  default_output_file:write(string.format("Route points:\n"))
-	--		for num,wpt in pairs(route.route) do
-	--		  local latlong   = LoLoCoordinatesToGeoCoordinates(wpt.world_point.x,wpt.world_point.z);
-	--		  default_output_file:write(string.format("point_num = %d ,wpt_pos = (%f, %f ,%f) ,next %d ll = (%f , %f)\n",wpt.this_point_num,wpt.world_point.x,wpt.world_point.y,wpt.world_point.z,wpt.next_point_num,latlong.latitude,latlong.longitude))
-	--		end
-	--	end
-	--	local selfdata=LoGetSelfData()
-	--	if selfdata then
-	--	 --LatLongAlt = { Lat = , Long = , Alt = }
-	--	    --local latitude,longitude  = LoLoCoordinatesToGeoCoordinates(selfdata.LatLongAlt.Lat,selfdata.LatLongAlt.Long);
-	--	    default_output_file:write(string.format("self ll = %f , %f\n",selfdata.LatLongAlt.Lat,selfdata.LatLongAlt.Long))
-	--	end
-	--	local stations = LoGetPayloadInfo()
-	--	if stations then
-	--		default_output_file:write(string.format("Current = %d \n",stations.CurrentStation))
-
-	--		for i_st,st in pairs (stations.Stations) do
-	--			local name = LoGetNameByType(st.weapon.level1,st.weapon.level2,st.weapon.level3,st.weapon.level4);
-	--			if name then
-	--			default_output_file:write(string.format("weapon = %s ,count = %d \n",name,st.count))
-	--			else
-	--			default_output_file:write(string.format("weapon = {%d,%d,%d,%d} ,count = %d \n", st.weapon.level1,st.weapon.level2,st.weapon.level3,st.weapon.level4,st.count))
-	--			end
-	--		end
-	--	end
-
-	--	local Nav = LoGetNavigationInfo()
-	--	if Nav then
-	--		default_output_file:write(string.format("%s ,%s  ,ACS: %s\n",Nav.SystemMode.master,Nav.SystemMode.submode,Nav.ACS.mode))
-	--		default_output_file:write(string.format("Requirements :\n\t  roll %d\n\t pitch %d\n\t speed %d\n",Nav.Requirements.roll,Nav.Requirements.pitch,Nav.Requirements.speed))
-	--	end
---	end
+	--default_output_file:write("step\n")
 
     if isconnected==1 then
         local line,error=tcpclient:receive()
@@ -269,14 +163,53 @@ function LuaExportActivityNextEvent(t)
             socket.try(tcpclient:close())
             isconnected=0
         else
+			local selfdata=LoGetSelfData()
+
+			if selfdata then
+				prevLat=selfdata.LatLongAlt.Lat
+				prevLong=selfdata.LatLongAlt.Long
+				aircraftstate["posy"]=selfdata.LatLongAlt.Lat;
+				aircraftstate["posx"]=selfdata.LatLongAlt.Long;
+				aircraftstate["bearing"]=selfdata.Heading;
+				
+				--default_output_file:write("objects:\n")
+				--default_output_file:write(string.format("%s",table_to_string(LoGetWorldObjects())))
+				--default_output_file:write("wings:\n")
+				--default_output_file:write(string.format("%s",table_to_string(LoGetWingInfo())))
+				local allobjects=LoGetWorldObjects()
+				for k,v in pairs(allobjects) do
+					if (v.Type.level1==1 and (v.Type.level2==1 or v.Type.level2==2) and v.CoalitionID==selfdata.CoalitionID and k~=LoGetPlayerPlaneId()) then
+						local ao={}
+						ao["posy"]=v.LatLongAlt.Lat
+						ao["posx"]=v.LatLongAlt.Long
+						ao["bearing"]=v.Heading
+						ao["groupid"]=1
+						aircraftstate["airobjects"][k]=ao
+					end
+				end
+				local wings=LoGetWingInfo()
+				for k,v in pairs(wings) do
+					aircraftstate["airobjects"][tonumber(v.wingmen_id)].groupid=0
+				end
+				--default_output_file:write("refined:\n")
+				--default_output_file:write(string.format("%s",table_to_string(aircraftstate)))
+			end
+			local route = LoGetRoute()
+			if route then
+				local latlong = LoLoCoordinatesToGeoCoordinates(route.goto_point.world_point.x,route.goto_point.world_point.z)
+				local wp={}
+				wp["posy"]=latlong.latitude
+				wp["posx"]=latlong.longitude
+				wp["id"]=route.goto_point.this_point_num-1
+				aircraftstate["waypoints"][wp["id"]]=wp
+				aircraftstate["selectedwp"]=wp["id"]
+			end
             --default_output_file:write(string.format("sending %f %f %f\n",aircraftstate['posx'],aircraftstate['posy'],aircraftstate['bearing']))
             local buffer={}
             mp.packers['float'](buffer,aircraftstate['posx'])
             mp.packers['float'](buffer,aircraftstate['posy'])
             mp.packers['float'](buffer,aircraftstate['bearing'])
-            --mp.packers['signed'](buffer,#aircraftstate['waypoints'])
 			mp.packers['signed'](buffer,tablecount(aircraftstate['waypoints']))
-            --mp.packers['signed'](buffer,table.getn(aircraftstate['waypoints']))
 			--default_output_file:write(string.format("wpsize %d\n",tablecount(aircraftstate['waypoints'])))
             for _,v in pairs(aircraftstate['waypoints']) do
 			    --default_output_file:write(string.format("wp: %f %f \n",v['posx'],v['posy']))
@@ -285,13 +218,20 @@ function LuaExportActivityNextEvent(t)
                 mp.packers['signed'](buffer,v['id'])
             end
 			mp.packers['signed'](buffer,aircraftstate['selectedwp'])
-            --bufferraw=table.tconcat(buffer)
+			
+			mp.packers['signed'](buffer,tablecount(aircraftstate['airobjects']))
+            for _,v in pairs(aircraftstate['airobjects']) do
+			    --default_output_file:write(string.format("wp: %f %f \n",v['posx'],v['posy']))
+                mp.packers['float'](buffer,v['posx'])
+                mp.packers['float'](buffer,v['posy'])
+				mp.packers['float'](buffer,v['bearing'])
+                mp.packers['signed'](buffer,v['groupid'])
+            end
             udpserver:sendto(table.concat(buffer), clientip, 5555)
         end
     else
         local readable, _, error = socket.select({tcpserver}, nil,timout)
         if readable[1] then
-            --default_output_file:write("have something\n")
             if isconnected==0 then
                 tcpclient=tcpserver:accept()
                 if tcpclient then
@@ -302,12 +242,10 @@ function LuaExportActivityNextEvent(t)
             else
 
             end
-        else
-            --default_output_file:write("nothing\n")
         end
     end
 
-	tNext = tNext + 0.1
+	tNext = tNext + 0.3
 
 	return tNext
 end
@@ -1227,3 +1165,5 @@ To be continued...
 --~ Route points:
 --~ self ll = 42.347966 , 41.819509
 --~ t = 1.500000
+
+--local Tacviewlfs=require('lfs');dofile(Tacviewlfs.writedir()..'Scripts/TacviewExportDCS.lua')
