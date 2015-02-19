@@ -72,6 +72,11 @@ The instructions below are for building the project from source. For convenience
 
 ###Versions
 
+
+#####0.2.1
+* Remove destroyed aircraft from the view.
+* Added exception handling to export script.
+
 #####0.2.0
 * Added allied flights to the TAD display
 
