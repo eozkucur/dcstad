@@ -19,6 +19,7 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
+import java.awt.Rectangle;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
@@ -72,6 +73,8 @@ public class Launcher extends JPanel implements DcsNetListener {
 
    private int startx;
    private int starty;
+
+   private Rectangle startRect;
 
    public Launcher() {
       System.out.println("constructing launcher");
@@ -221,6 +224,7 @@ public class Launcher extends JPanel implements DcsNetListener {
          public void mousePressed(MouseEvent e) {
             startx=e.getX();
             starty=e.getY();
+            startRect=tadFrame.getBounds();
          }
 
          @Override
@@ -242,8 +246,15 @@ public class Launcher extends JPanel implements DcsNetListener {
       this.addMouseMotionListener(new MouseMotionListener() {
          @Override
          public void mouseDragged(MouseEvent e) {
-            tadFrame.setLocation(e.getX() - startx + tadFrame.getLocation().x,
-                                             e.getY() - starty + tadFrame.getLocation().y);
+            if(e.getButton()==MouseEvent.BUTTON1) {
+               tadFrame.setLocation(e.getX() - startx + tadFrame.getLocation().x,
+                                    e.getY() - starty + tadFrame.getLocation().y);
+            }else if(e.getButton()==MouseEvent.BUTTON3){
+               Rectangle r=tadFrame.getBounds();
+               if(r.getHeight()>40&&r.getWidth()>40) {
+                  tadFrame.setBounds(startRect.x,startRect.y,startRect.width+e.getX()-startx,startRect.height+e.getX()-startx);
+               }
+            }
          }
 
          @Override
