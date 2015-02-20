@@ -22,7 +22,8 @@ The instructions below are for building the project from source. For convenience
   javac -version
   ```
 
-* Copy `Export.lua` file and `MessagePack` folder from `dcstad\lua` folder to `C:\<user>\Documents\Saved Games\DCS\Scripts` folder.
+* If you have no existing export script, copy `Export.lua`, `dcstad.lua` files and `MessagePack` folder from `dcstad\lua` folder to `C:\<user>\Documents\Saved Games\DCS\Scripts` folder.
+* If you have an existing export script, copy `dcstad.lua` file and `MessagePack` folder from `dcstad\lua` folder to `C:\<user>\Documents\Saved Games\DCS\Scripts` folder. And copy single line content from `dcstad\export-script\Export.lua` to the end of your existing `Export.lua` file.
 
   ####Only PC application
   
@@ -63,7 +64,7 @@ The instructions below are for building the project from source. For convenience
 * For TAD view on Android, right click and chose `Start Server`.
 * You can run both android and PC TAD view at the same time.
 * `Start Server` option is only required for the android app.
-* The TAD view is a borderless always-on-top window. You can drag it with `left click`.
+* The TAD view is a borderless always-on-top window. You can drag it with `left click`, and resize it with `right click & drag`.
 * `Left click` changes scale.
 * `Right click` changes the focused object.
 * Due to some issues with the DCS api, the whole route information cannot be retrieved. Instead, cycle waypoints once in the beginning of the simulation.
@@ -72,6 +73,9 @@ The instructions below are for building the project from source. For convenience
 
 ###Versions
 
+#####0.2.2
+* Easier integration with existing export scripts.
+* Right-click drag to resize window.
 
 #####0.2.1
 * Remove destroyed aircraft from the view.
