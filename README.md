@@ -22,8 +22,9 @@ The instructions below are for building the project from source. For convenience
   javac -version
   ```
 
+* If you have an existing export script, copy `dcstad.lua` file and `MessagePack` folder from `dcstad\lua` folder to `C:\<user>\Documents\Saved Games\DCS\Scripts` folder. And copy single line content from `dcstad\lua\Export.lua` to the end of your existing `Export.lua` file.
+
 * If you have no existing export script, copy `Export.lua`, `dcstad.lua` files and `MessagePack` folder from `dcstad\lua` folder to `C:\<user>\Documents\Saved Games\DCS\Scripts` folder.
-* If you have an existing export script, copy `dcstad.lua` file and `MessagePack` folder from `dcstad\lua` folder to `C:\<user>\Documents\Saved Games\DCS\Scripts` folder. And copy single line content from `dcstad\export-script\Export.lua` to the end of your existing `Export.lua` file.
 
   ####Only PC application
   
