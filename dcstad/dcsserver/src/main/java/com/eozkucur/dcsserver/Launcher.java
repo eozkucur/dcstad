@@ -76,6 +76,8 @@ public class Launcher extends JPanel implements DcsNetListener {
 
    private Rectangle startRect;
 
+   private boolean isleftclick;
+
    public Launcher() {
       System.out.println("constructing launcher");
       try {
@@ -225,6 +227,7 @@ public class Launcher extends JPanel implements DcsNetListener {
             startx=e.getX();
             starty=e.getY();
             startRect=tadFrame.getBounds();
+            isleftclick=e.getButton()==MouseEvent.BUTTON1;
          }
 
          @Override
@@ -246,10 +249,10 @@ public class Launcher extends JPanel implements DcsNetListener {
       this.addMouseMotionListener(new MouseMotionListener() {
          @Override
          public void mouseDragged(MouseEvent e) {
-            if(e.getButton()==MouseEvent.BUTTON1) {
+            if(isleftclick) {
                tadFrame.setLocation(e.getX() - startx + tadFrame.getLocation().x,
                                     e.getY() - starty + tadFrame.getLocation().y);
-            }else if(e.getButton()==MouseEvent.BUTTON3){
+            }else{
                Rectangle r=tadFrame.getBounds();
                if(r.getHeight()>40&&r.getWidth()>40) {
                   tadFrame.setBounds(startRect.x,startRect.y,startRect.width+e.getX()-startx,startRect.height+e.getX()-startx);
@@ -455,7 +458,7 @@ public class Launcher extends JPanel implements DcsNetListener {
       if (!serverRunning) {
          net.stopClient();
       }
-      System.out.println("Tad stopped");
+      System.out.println("Stopped Tad");
       if (serverRunning) {
          trayIcon.setImage(images.get(2));
       } else {
@@ -468,7 +471,7 @@ public class Launcher extends JPanel implements DcsNetListener {
       tadFrame.setVisible(true);
       tadRunning = true;
       net.startClient(false);
-      System.out.println("Stopped Tad");
+      System.out.println("Started Tad");
       if (serverRunning) {
          trayIcon.setImage(images.get(3));
       } else {
