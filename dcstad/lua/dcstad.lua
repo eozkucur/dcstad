@@ -20,44 +20,46 @@ dcstad = {
     clientport=nil,
     prevLat=nil,
     prevLong=nil,
+    lsf=nil,
 
-    tadstart=function()
-        aircraftstate={["posx"]=41.844450,["posy"]=41.955505,["bearing"]=0.2,["selectedwp"]=0,["waypoints"]={},["airobjects"]={}}
-        timout=0.001
-        isconnected=0
+    tadstart=function(self)
+        self.aircraftstate={["posx"]=41.844450,["posy"]=41.955505,["bearing"]=0.2,["selectedwp"]=0,["waypoints"]={},["airobjects"]={}}
+        self.timout=0.001
+        self.isconnected=0
 
-        --default_output_file = io.open(lfs.writedir().."/Logs/Export.log", "w")
+        self.lsf=require('lfs')
+        self.default_output_file = io.open(self.lfs.writedir().."/Logs/Export.log", "w")
 
-        package.path  = package.path..";"..lfs.currentdir().."/LuaSocket/?.lua"
-        package.cpath = package.cpath..";"..lfs.currentdir().."/LuaSocket/?.dll"
-        package.path  = package.path..";"..lfs.writedir().."/Scripts/MessagePack/?.lua"
-        socket = require("socket")
-        mp = require("MessagePack")
-        --default_output_file:write(string.format("Start\n"))
-        tcpserver=socket.bind("*", 5556)
-        tcpserver:settimeout(timout)
-        udpserver = socket.udp()
+        package.path  = package.path..";"..self.lfs.currentdir().."/LuaSocket/?.lua"
+        package.cpath = package.cpath..";"..self.lfs.currentdir().."/LuaSocket/?.dll"
+        package.path  = package.path..";"..self.lfs.writedir().."/Scripts/MessagePack/?.lua"
+        self.socket = require("socket")
+        self.mp = require("MessagePack")
+        --self.default_output_file:write(string.format("Start\n"))
+        self.tcpserver=self.socket.bind("*", 5556)
+        self.tcpserver:settimeout(self.timout)
+        self.udpserver = self.socket.udp()
     end,
-    tadstop=function()
-        if default_output_file then
-            default_output_file:close()
-            default_output_file = nil
+    tadstop=function(self)
+        if self.default_output_file then
+            self.default_output_file:close()
+            self.default_output_file = nil
         end
-        if tcpclient then
-            socket.try(tcpclient:close())
+        if self.tcpclient then
+            self.socket.try(self.tcpclient:close())
         end
-        socket.try(tcpserver:close())
-        socket.try(udpserver:close())
+        self.socket.try(self.tcpserver:close())
+        self.socket.try(self.udpserver:close())
     end,
 
 
-    tablecount=function(tbl)
+    tablecount=function(self,tbl)
         local c=0
         for k in pairs(tbl) do c=c+1 end
         return c
     end,
 
-    table_print=function(tt, indent, done)
+    table_print=function(self,tt, indent, done)
         done = done or {}
         indent = indent or 0
         if type(tt) == "table" then
@@ -88,7 +90,7 @@ dcstad = {
         end
     end,
 
-    table_to_string=function( tbl )
+    table_to_string=function( self,tbl )
         if  "nil"       == type( tbl ) then
             return tostring(nil)
         elseif  "table" == type( tbl ) then
@@ -100,28 +102,26 @@ dcstad = {
         end
     end,
 
-    readAndSendData=function()
-        if isconnected==1 then
-            local line,error=tcpclient:receive()
+    readAndSendData=function(self)
+        if self.isconnected==1 then
+            local line,error=self.tcpclient:receive()
             if error=="closed" then
-                --default_output_file:write("closed\n")
-                socket.try(tcpclient:close())
-                isconnected=0
+                --self.default_output_file:write("closed\n")
+                self.socket.try(self.tcpclient:close())
+                self.isconnected=0
             else
                 local selfdata=LoGetSelfData()
 
                 if selfdata then
-                    prevLat=selfdata.LatLongAlt.Lat
-                    prevLong=selfdata.LatLongAlt.Long
-                    aircraftstate["posy"]=selfdata.LatLongAlt.Lat;
-                    aircraftstate["posx"]=selfdata.LatLongAlt.Long;
-                    aircraftstate["bearing"]=selfdata.Heading;
+                    self.aircraftstate["posy"]=selfdata.LatLongAlt.Lat;
+                    self.aircraftstate["posx"]=selfdata.LatLongAlt.Long;
+                    self.aircraftstate["bearing"]=selfdata.Heading;
 
-                    --default_output_file:write("objects:\n")
-                    --default_output_file:write(string.format("%s",table_to_string(LoGetWorldObjects())))
-                    --default_output_file:write("wings:\n")
-                    --default_output_file:write(string.format("%s",table_to_string(LoGetWingInfo())))
-                    aircraftstate["airobjects"]={}
+                    self.default_output_file:write("objects:\n")
+                    self.default_output_file:write(string.format("%s",self:table_to_string(LoGetWorldObjects())))
+                    self.default_output_file:write("wings:\n")
+                    self.default_output_file:write(string.format("%s",self:table_to_string(LoGetWingInfo())))
+                    self.aircraftstate["airobjects"]={}
                     local allobjects=LoGetWorldObjects()
                     for k,v in pairs(allobjects) do
                         if (v.Type.level1==1 and (v.Type.level2==1 or v.Type.level2==2) and v.CoalitionID==selfdata.CoalitionID and k~=LoGetPlayerPlaneId()) then
@@ -130,18 +130,18 @@ dcstad = {
                             ao["posx"]=v.LatLongAlt.Long
                             ao["bearing"]=v.Heading
                             ao["groupid"]=1
-                            aircraftstate["airobjects"][k]=ao
+                            self.aircraftstate["airobjects"][k]=ao
                         end
                     end
                     local wings=LoGetWingInfo()
                     for k,v in pairs(wings) do
-                        local ao=aircraftstate["airobjects"][tonumber(v.wingmen_id)]
+                        local ao=self.aircraftstate["airobjects"][tonumber(v.wingmen_id)]
                         if ao then
                             ao.groupid=0
                         end
                     end
-                    --default_output_file:write("refined:\n")
-                    --default_output_file:write(string.format("%s",table_to_string(aircraftstate)))
+                    self.default_output_file:write("refined:\n")
+                    self.default_output_file:write(string.format("%s",self:table_to_string(self.aircraftstate)))
                 end
                 local route = LoGetRoute()
                 if route then
@@ -150,43 +150,43 @@ dcstad = {
                     wp["posy"]=latlong.latitude
                     wp["posx"]=latlong.longitude
                     wp["id"]=route.goto_point.this_point_num-1
-                    aircraftstate["waypoints"][wp["id"]]=wp
-                    aircraftstate["selectedwp"]=wp["id"]
+                    self.aircraftstate["waypoints"][wp["id"]]=wp
+                    self.aircraftstate["selectedwp"]=wp["id"]
                 end
-                --default_output_file:write(string.format("sending %f %f %f\n",aircraftstate['posx'],aircraftstate['posy'],aircraftstate['bearing']))
+                self.default_output_file:write(string.format("sending %f %f %f\n",self.aircraftstate['posx'],self.aircraftstate['posy'],self.aircraftstate['bearing']))
                 local buffer={}
-                mp.packers['float'](buffer,aircraftstate['posx'])
-                mp.packers['float'](buffer,aircraftstate['posy'])
-                mp.packers['float'](buffer,aircraftstate['bearing'])
-                mp.packers['signed'](buffer,tablecount(aircraftstate['waypoints']))
-                --default_output_file:write(string.format("wpsize %d\n",tablecount(aircraftstate['waypoints'])))
-                for _,v in pairs(aircraftstate['waypoints']) do
-                    --default_output_file:write(string.format("wp: %f %f \n",v['posx'],v['posy']))
-                    mp.packers['float'](buffer,v['posx'])
-                    mp.packers['float'](buffer,v['posy'])
-                    mp.packers['signed'](buffer,v['id'])
+                self.mp.packers['float'](buffer,self.aircraftstate['posx'])
+                self.mp.packers['float'](buffer,self.aircraftstate['posy'])
+                self.mp.packers['float'](buffer,self.aircraftstate['bearing'])
+                self.mp.packers['signed'](buffer,self:tablecount(self.aircraftstate['waypoints']))
+                self.default_output_file:write(string.format("wpsize %d\n",self:tablecount(self.aircraftstate['waypoints'])))
+                for _,v in pairs(self.aircraftstate['waypoints']) do
+                    self.default_output_file:write(string.format("wp: %f %f \n",v['posx'],v['posy']))
+                    self.mp.packers['float'](buffer,v['posx'])
+                    self.mp.packers['float'](buffer,v['posy'])
+                    self.mp.packers['signed'](buffer,v['id'])
                 end
-                mp.packers['signed'](buffer,aircraftstate['selectedwp'])
+                self.mp.packers['signed'](buffer,self.aircraftstate['selectedwp'])
 
-                mp.packers['signed'](buffer,tablecount(aircraftstate['airobjects']))
-                for _,v in pairs(aircraftstate['airobjects']) do
-                    --default_output_file:write(string.format("wp: %f %f \n",v['posx'],v['posy']))
-                    mp.packers['float'](buffer,v['posx'])
-                    mp.packers['float'](buffer,v['posy'])
-                    mp.packers['float'](buffer,v['bearing'])
-                    mp.packers['signed'](buffer,v['groupid'])
+                self.mp.packers['signed'](buffer,self:tablecount(self.aircraftstate['airobjects']))
+                for _,v in pairs(self.aircraftstate['airobjects']) do
+                    self.default_output_file:write(string.format("wp: %f %f \n",v['posx'],v['posy']))
+                    self.mp.packers['float'](buffer,v['posx'])
+                    self.mp.packers['float'](buffer,v['posy'])
+                    self.mp.packers['float'](buffer,v['bearing'])
+                    self.mp.packers['signed'](buffer,v['groupid'])
                 end
-                udpserver:sendto(table.concat(buffer), clientip, 5555)
+                self.udpserver:sendto(table.concat(buffer), self.clientip, 5555)
             end
         else
-            local readable, _, error = socket.select({tcpserver}, nil,timout)
+            local readable, _, error = self.socket.select({self.tcpserver}, nil,self.timout)
             if readable[1] then
-                if isconnected==0 then
-                    tcpclient=tcpserver:accept()
-                    if tcpclient then
-                        tcpclient:settimeout(timout)
-                        clientip,clientport=tcpclient:getpeername()
-                        isconnected=1
+                if self.isconnected==0 then
+                    self.tcpclient=self.tcpserver:accept()
+                    if self.tcpclient then
+                        self.tcpclient:settimeout(self.timout)
+                        self.clientip,self.clientport=self.tcpclient:getpeername()
+                        self.isconnected=1
                     end
                 else
 
@@ -196,11 +196,11 @@ dcstad = {
     end,
 
 
-    tadupdate=function()
-        local status,err = pcall(ReadAndSendData)
+    tadupdate=function(self)
+        local status,err = pcall(self.readAndSendData)
 
         if not status then
-            --default_output_file:write("err\n")
+            --self.default_output_file:write("err\n")
         end
     end
 }
